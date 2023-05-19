@@ -77,14 +77,9 @@ This project was developed with the following frameworks:
 
 
 <!-- CONTACT -->
-## Contact
-
-E-Mail - miguelfernandes.personal@gmail.com
-
-My GitHub: [https://github.com/miguelcamposfernandes](https://github.com/miguelcamposfernandes)
-
 
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [Heroku: Cloud Application Platform](https://www.heroku.com)
+* [Miguel:] 
