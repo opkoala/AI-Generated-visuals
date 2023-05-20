@@ -24,32 +24,13 @@ line, = ax.plot(x, np.zeros(CHUNK))
 ax.set_xlim(0, CHUNK)
 ax.set_ylim(-1, 1)  # Adjust based on your audio input range
 
-# Compute beat frames using librosa
-tempo, beat_frames = librosa.beat.beat_track(audio_data, sr=sample_rate, hop_length=CHUNK)
-
-# Normalize beat frames to range [0, 1]
-normalized_beat_frames = (beat_frames - beat_frames.min()) / (beat_frames.max() - beat_frames.min())
-
-# Define color map for transitions based on beat frames
-color_map = plt.cm.get_cmap('cool')  # Use 'cool' colormap for color transitions
-
 # Start playing the audio
 sd.play(audio_data, sample_rate)
 
 while True:
-    # Update the plot with the new audio signal and color
+    # Update the plot with the new audio signal
     audio_signal = audio_data[:CHUNK]
     line.set_ydata(audio_signal)
-
-    # Get the current beat frame index
-    current_frame = len(audio_data) // CHUNK
-    
-    # Get the current beat frame color
-    current_color = color_map(normalized_beat_frames[current_frame])
-
-    # Set the line color
-    line.set_color(current_color)
-    
     fig.canvas.draw()
     fig.canvas.flush_events()
 
@@ -64,4 +45,3 @@ while True:
 sd.stop()
 
 plt.close(fig)
-
