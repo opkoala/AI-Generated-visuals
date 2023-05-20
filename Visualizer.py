@@ -1,14 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pydub import AudioSegment
 import librosa
 
-# Load the MP3 file
-file_name = "/Cupid.mp3" # Change
-
-audio = AudioSegment.from_file(file_name)
-audio_data = np.array(audio.get_array_of_samples())
-sample_rate = audio.frame_rate
+# Load the audio file
+download_name = "/full/path/to/Audio.mp3"
+audio_data, sample_rate = librosa.load(download_name)
 
 CHUNK = 1024  # Number of samples per chunk
 
@@ -20,11 +16,10 @@ ax.set_xlim(0, CHUNK)
 ax.set_ylim(-1, 1)  # Adjust based on your audio input range
 
 # Start playing the audio
-audio.play()
+# Add your audio playback code here
 
 while True:
-    # Update the plot with the new au
-    # dio signal
+    # Update the plot with the new audio signal
     audio_signal = audio_data[:CHUNK]
     line.set_ydata(audio_signal)
     fig.canvas.draw()
@@ -38,6 +33,6 @@ while True:
         break
 
 # Stop playing the audio
-audio.stop_playing()
+# Add your audio stop code here
 
 plt.close(fig)

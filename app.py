@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect, send_file, session
 from pytube import YouTube
 from io import BytesIO
+import pydub
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "654c0fb3968af9d5e6a9b3edcbc7051b"
@@ -26,7 +27,8 @@ def download_audio():
         audio.stream_to_buffer(buffer)
         buffer.seek(0)
 
-        return send_file(buffer, as_attachment=True, download_name="Audio - YT2Audio.mp3", mimetype="audio/mpeg")
+        return send_file(buffer, as_attachment=True, download_name="/full/path/to/Audio.mp3"
+, mimetype="audio/mpeg")
     
     return redirect(url_for("home"))
 
