@@ -1,46 +1,75 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pydub import AudioSegment
 import librosa
-import pytube
 
-# Get the YouTube link from the user
-youtube_link = input("Enter YouTube video link: ")
+from flask import Flask, render_template, request, url_for, redirect, send_file, session
+from pytube import YouTube
+from io import BytesIO
 
-# Download the YouTube video as an audio file
-youtube = pytube.YouTube(youtube_link)
-audio_stream = youtube.streams.filter(only_audio=True).first()
-download_name = audio_stream.download()
+app = Flask(__name__)
+app.config['SECRET_KEY'] = "654c0fb3968af9d5e6a9b3edcbc7051b"
 
-# Load the downloaded audio file
-audio_data, sample_rate = librosa.load(download_name)
+@app.route("/", methods=["GET", "POST"])
+def home():
+    if request.method == 'POST':
+        session['link'] = request.form.get('url')
+        try:
+            url = YouTube(session['link'])
+            url.check_availability()
+        except:
+            return render_template("error.html")
+        return render_template("download.html", url=url)
+    return render_template("home.html")
 
-CHUNK = 1024  # Number of samples per chunk
+@app.route("/download", methods=["GET", "POST"])
+def download_audio():
+    if request.method == "POST":
+        buffer = BytesIO()
+        url = YouTube(session['link'])
+        audio = url.streams.get_audio_only()
+        audio.stream_to_buffer(buffer)
+        buffer.seek(0)
 
-plt.ion()  # Turn on interactive mode
-fig, ax = plt.subplots()
-x = np.arange(0, CHUNK)  # x-axis for the plot
-line, = ax.plot(x, np.zeros(CHUNK))
-ax.set_xlim(0, CHUNK)
-ax.set_ylim(-1, 1)  # Adjust based on your audio input range
+        # Audio visualization code
+        audio_segment = AudioSegment.from_file(buffer)
+        audio_data = np.array(audio_segment.get_array_of_samples())
+        sample_rate = audio_segment.frame_rate
 
-# Start playing the audio
-# Add your audio playback code here
+        CHUNK = 1024  # Number of samples per chunk
 
-while True:
-    # Update the plot with the new audio signal
-    audio_signal = audio_data[:CHUNK]
-    line.set_ydata(audio_signal)
-    fig.canvas.draw()
-    fig.canvas.flush_events()
+        plt.ion()  # Turn on interactive mode
+        fig, ax = plt.subplots()
+        x = np.arange(0, CHUNK)  # x-axis for the plot
+        line, = ax.plot(x, np.zeros(CHUNK))
+        ax.set_xlim(0, CHUNK)
+        ax.set_ylim(-1, 1)  # Adjust based on your audio input range
 
-    # Remove the plotted samples from the audio data
-    audio_data = audio_data[CHUNK:]
+        # Start playing the audio
+        audio_segment.export("temp_audio.mp3", format="mp3")  # Export the audio to a temporary file
+        audio_player = AudioSegment.from_file("temp_audio.mp3")
+        audio_player.export("temp_audio.wav", format="wav")  # Convert the audio to WAV format
+        audio_data, _ = librosa.load("temp_audio.wav", sr=sample_rate)
 
-    if len(audio_data) < CHUNK:
-        # End of the audio file
-        break
+        for i in range(0, len(audio_data), CHUNK):
+            # Update the plot with the new audio signal
+            audio_signal = audio_data[i:i+CHUNK]
+            line.set_ydata(audio_signal)
+            fig.canvas.draw()
+            fig.canvas.flush_events()
 
-# Stop playing the audio
-# Add your audio stop code here
+        # Stop playing the audio
+        audio_player.stop_playing()
 
-plt.close(fig)
+        plt.close(fig)
+
+        # Clean up temporary files
+        os.remove("temp_audio.mp3")
+        os.remove("temp_audio.wav")
+
+        return send_file(buffer, as_attachment=True, download_name="Audio - YT2Audio.mp3", mimetype="audio/mpeg")
+    
+    return redirect(url_for("home"))
+
+if __name__ == '__main__':
+    app.run(debug=True)
