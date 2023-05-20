@@ -1,9 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
+import pytube
+import sounddevice as sd
 
-# Load the audio file
-download_name = "/full/path/to/Audio.mp3"
+# Get the YouTube link from the user
+youtube_link = input("Enter YouTube link: ")
+
+# Download the YouTube video as an audio file
+youtube = pytube.YouTube(youtube_link)
+audio_stream = youtube.streams.filter(only_audio=True).first()
+download_name = audio_stream.download()
+
+# Load the downloaded audio file
 audio_data, sample_rate = librosa.load(download_name)
 
 CHUNK = 1024  # Number of samples per chunk
@@ -16,7 +25,7 @@ ax.set_xlim(0, CHUNK)
 ax.set_ylim(-1, 1)  # Adjust based on your audio input range
 
 # Start playing the audio
-# Add your audio playback code here
+sd.play(audio_data, sample_rate)
 
 while True:
     # Update the plot with the new audio signal
@@ -33,6 +42,6 @@ while True:
         break
 
 # Stop playing the audio
-# Add your audio stop code here
+sd.stop()
 
 plt.close(fig)
