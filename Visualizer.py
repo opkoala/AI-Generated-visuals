@@ -19,10 +19,13 @@ CHUNK = 1024  # Number of samples per chunk
 
 plt.ion()  # Turn on interactive mode
 fig, ax = plt.subplots()
-x = np.arange(0, CHUNK)  # x-axis for the plot
-line, = ax.plot(x, np.zeros(CHUNK))
-ax.set_xlim(0, CHUNK)
-ax.set_ylim(-1, 1)  # Adjust based on your audio input range
+ax.set_xlim(-1, 1)
+ax.set_ylim(-1, 1)
+ax.set_aspect('equal')
+ax.axis('off')  # Remove the axes
+
+circle = plt.Circle((0, 0), 1, fill=False)
+ax.add_patch(circle)
 
 # Start playing the audio
 sd.play(audio_data[:CHUNK], sample_rate)
@@ -30,7 +33,10 @@ sd.play(audio_data[:CHUNK], sample_rate)
 while True:
     # Update the plot with the new audio signal
     audio_signal = audio_data[:CHUNK]
-    line.set_ydata(audio_signal)
+    angles = np.linspace(0, 2 * np.pi, CHUNK)
+    x = np.cos(angles)
+    y = np.sin(angles)
+    circle.set_data(x, y)
     fig.canvas.draw()
     fig.canvas.flush_events()
 
@@ -44,4 +50,3 @@ while True:
 sd.stop()  # Stop audio playback
 
 plt.close(fig)
-
