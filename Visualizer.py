@@ -13,7 +13,7 @@ audio_stream = youtube.streams.filter(only_audio=True).first()
 download_name = audio_stream.download()
 
 # Load the downloaded audio file
-audio_data, sample_rate = librosa.load(download_name, sr=None)
+audio_data, sample_rate = librosa.load(download_name, sr=None, mono=True)
 
 CHUNK = 1024  # Number of samples per chunk
 
@@ -44,3 +44,4 @@ while True:
 sd.stop()  # Stop audio playback
 
 plt.close(fig)
+
