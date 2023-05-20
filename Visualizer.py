@@ -4,6 +4,25 @@ import librosa
 import pytube
 import sounddevice as sd
 
+class Queue:
+    import random
+
+    def __init__(self = []):
+        return self
+    
+    def add_song(self, song):
+        self = self.insert(0, song)
+    
+    def remove_song(self, song):
+        self = self.remove(song)
+
+    def shuffle(self):
+        random.shuffle(self)
+    
+    def skip(self):
+        self.remove()
+
+    #Add skip funcitonality, shuffle, pause and play
 # Get the YouTube link from the user
 youtube_link = input("Enter YouTube video link: ")
 
@@ -13,7 +32,7 @@ audio_stream = youtube.streams.filter(only_audio=True).first()
 download_name = audio_stream.download()
 
 # Load the downloaded audio file
-audio_data, sample_rate = librosa.load(download_name, sr=None)
+audio_data, sample_rate = librosa.load(download_name, sr=None, mono=True)
 
 CHUNK = 1024  # Number of samples per chunk
 
@@ -44,3 +63,4 @@ while True:
 sd.stop()  # Stop audio playback
 
 plt.close(fig)
+
